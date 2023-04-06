@@ -7,5 +7,6 @@ config: Dict[str, Any] = {
     "latent_size": 100,
     "lr": 0.0002,
     "beta1": 0.5,
-    "r1_coef": 2
+    "r1_coef": 2,
+    "csp_block": True
 }
