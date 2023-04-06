@@ -115,7 +115,7 @@ def main():
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     r1_reg = R1().to(device)
-    generator = Generator(cfg['latent_size']).to(device)
+    generator = Generator(cfg['latent_size'], cfg['csp_block']).to(device)
     discriminator = Discriminator().to(device)
 
     criterion = nn.BCEWithLogitsLoss()
