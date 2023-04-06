@@ -28,17 +28,43 @@ class CSPBlock(nn.Module):
             nn.Conv2d(in_channels, in_channels, kernel_size=3, padding=1),
             nn.BatchNorm2d(in_channels),
         )
+    
     def forward(self, x):
         return self.conv2(x) + self.block(self.conv1(x))
 
+class ResidualBlock(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super().__init__()
+        
+        self.block = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(),
+            nn.Conv2d(out_channels, out_channels, kernel_size=3, stride=1, padding=1),
+            nn.BatchNorm2d(out_channels)
+        )
+        self.downsample = nn.Conv2d(in_channels, out_channels, kernel_size=1) if in_channels != out_channels else None
+        self.upsample = nn.Upsample(scale_factor=2)
+        self.relu = nn.ReLU()
+    
+    def forward(self, x):
+        residual = x
+        out = self.block(x)
+        if self.downsample:
+            residual = self.downsample(residual)
+        return self.upsample(self.relu(residual + out))
+
 class Generator(nn.Module):
-    def __init__(self, lat_dim):
+    def __init__(self, lat_dim, use_csp_blocks=True):
         super(Generator, self).__init__()
 
         channels = [512, 256, 128, 64]
-
+        
         self.linear = nn.Linear(lat_dim, 1024*4*4)
-        self.csp_up = nn.Sequential(*[CSPBlock(ch) for ch in channels])
+        if use_csp_blocks:
+            self.up = nn.Sequential(*[CSPBlock(ch) for ch in channels])
+        else:
+            self.up = nn.Sequential(*[ResidualBlock(ch*2, ch) for ch in channels])
 
         self.deconv = nn.Sequential(
             nn.ConvTranspose2d(64, 3, 4, 2, 1),
@@ -47,9 +73,8 @@ class Generator(nn.Module):
 
     def forward(self, x):
         x1 = self.linear(x).view(-1, 1024, 4, 4)
-        x2 = self.csp_up(x1)
+        x2 = self.up(x1)
         return self.deconv(x2)
-
 
 class Discriminator(nn.Module):
     def __init__(self, ):
