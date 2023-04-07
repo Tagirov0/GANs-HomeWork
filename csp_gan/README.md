@@ -12,7 +12,11 @@
 
 * Остановился на R1 регуляризации с коэффициентом = 2, так сетка генерировала изображения более лучшего качества 
 
+#### GAN с Residual блоками справился с задачей хуже, обучение расходится
+<img src="https://github.com/Tagirov0/GANs-HomeWork/blob/main/csp_gan/test/simple_resnet_gan.png" width=100% height=100%>
+
+* Возможно перед каждым upsampling изображения нужно добавлять по еще одному блоку без downsampling каналов
+
 #### Также пробовал заменить BatchNorm на Dropout, но понял, что затея плохая)
 <img src="https://github.com/Tagirov0/GANs-HomeWork/blob/main/csp_gan/test/csp_gan_dropout.png" width=100% height=100%>
 
-### Сетка с Resnet блоками в процессе обучения
